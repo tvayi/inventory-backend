@@ -24,6 +24,6 @@ WORKDIR /root/
 
 COPY --from=builder /app/inventory_service .
 
-EXPOSE 50051
+EXPOSE 9080
 
 ENTRYPOINT ["./inventory_service"]

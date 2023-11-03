@@ -5,13 +5,17 @@ import (
 	"database/sql"
 	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/lib/pq"
+	"github.com/tvaayi/inventory-backend/client"
 	pb "github.com/tvaayi/inventory-backend/proto"
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"time"
 )
 
 func main() {
+	// waiting until db starts
+	time.Sleep(10)
 	mig_db, err := sql.Open("postgres", "user=postgres dbname=inventoryDB sslmode=disable password=yourpassword host=postgres_database port=5432")
 	if err != nil {
 		log.Fatal(err)
@@ -29,7 +33,7 @@ func main() {
 
 	log.Println("Table created successfully!")
 
-	lis, err := net.Listen("tcp", ":9000")
+	lis, err := net.Listen("tcp", ":9080")
 	if err != nil {
 		log.Fatalf("Failed to listen on port 9000: %v", err)
 	}
@@ -46,7 +50,15 @@ func main() {
 
 	pb.RegisterInventoryServiceServer(grpcServer, &s)
 
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve gRPC server on port 9000: %v", err)
-	}
+	// run separate goruntine to run client
+	go func() {
+		log.Println("Starting gRPC server on port 9000...")
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve gRPC server on port 9000: %v", err)
+		}
+	}()
+
+	time.Sleep(10)
+	log.Println("Waiting until server started (only for testing)")
+	client.StartService()
 }

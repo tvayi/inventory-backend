@@ -1,0 +1,26 @@
+syntax="proto3";
+
+option go_package = "./proto";
+
+package inventory_service;
+
+service InventoryService {
+    rpc GetInventory(InventoryRequest) returns (InventoryItem);
+    rpc AddInventoryItem(InventoryItem) returns (InventoryResponse);
+    rpc DeleteInventoryItem(InventoryRequest) returns (InventoryResponse);
+}
+
+message InventoryItem {
+    string product_code = 1;
+    string name = 2;
+    int32 amount = 3;
+    double cost = 4;
+}
+
+message InventoryRequest {
+    string product_code = 1;
+}
+
+message InventoryResponse {
+    string response = 1;
+}
